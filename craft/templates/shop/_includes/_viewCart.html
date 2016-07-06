@@ -1,0 +1,8 @@
+
+
+<span id="cd-cart-trigger">
+  <a id="viewCart" class="button {% if page == 'cart' %}button-primary{% endif %}" href="{{ url('shop/cart') }}">
+    <i class="fa fa-shopping-cart"></i> {{ "Cart"|t }} <span id="itemCount">({{ cart.totalQty }})</span>
+  </a>
+</span>
+

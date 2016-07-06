@@ -1,0 +1,75 @@
+{% set addCartCss %}
+
+
+{% endset %}
+
+{% set myJs %}
+  $( document ).ready(function() {
+      
+    $("#addToCart").submit(function(e) {
+
+      e.preventDefault();
+      console.log('form submitting...');
+      var data = $(this).serialize();
+
+      data[window.csrfTokenName] = window.csrfTokenValue;
+
+      $.post('/actions/' + $('input[name=action]').val(), data, function(response) {
+          if (response.success) {
+            $("#addToCartButton").val("Added!");
+            $.event.trigger({
+              type: "itemAddedToCart",
+              contents: response.cart,
+              time: new Date()
+            });
+          } 
+          else {
+             $("#addToCartButton").val("Error!");
+          }
+      });
+
+    });
+
+  });
+{% endset %}
+
+{% includeCss addCartCss %}
+{% includeJs myJs %}
+
+{% cache %}
+
+{% set productVariants = product.variants %}
+
+<form method="POST" id="addToCart">
+    <input type="hidden" name="action" value="commerce/cart/updateCart">
+    <input type="hidden" name="redirect" value="shop/cart">
+    <input type="hidden" name="qty" value="1">
+    {{ getCsrfInput() }}
+    <select name="purchasableId">
+        {% for purchasable in productVariants %}
+            <option {% if purchasable.stock <= 0 and purchasable.unlimitedStock == false %}disabled {% endif %}
+                    value="{{ purchasable.purchasableId }}">{{ purchasable.description }} {{ purchasable.price|currency(cart.currency) }}</option>
+        {% endfor %}
+    </select>
+    <input id="submit" class="button" type="submit" value="{{ "Add to cart"|t }}" />
+    
+    {% for sale in craft.onsale.salesForProduct(product) %}
+      {% set readableDiscount = sale.discountAmount * 100 %}
+      <p>This is part of the {{ sale.name }} </p>
+      <p>You get {{ readableDiscount|abs }} {{ sale.discountType }} off</p>
+    {% endfor %}
+    
+
+     {% for purchasable in productVariants %}
+        {% if purchasable.onSale %}
+          {% set savedAmount = purchasable.price - purchasable.salePrice %}
+          <p>On sale for {{ purchasable.salePrice | currency(cart.currency) }}</p>
+          <p>You save {{ savedAmount | currency(cart.currency) }}</p>
+        {% endif %}
+    {% endfor %}
+
+  {% include 'shop/_includes/_likes' %}
+
+</form>
+
+{% endcache %}

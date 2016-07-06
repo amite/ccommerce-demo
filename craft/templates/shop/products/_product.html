@@ -1,0 +1,38 @@
+{% extends 'shop/_layouts/main' %}
+
+{% block main %}
+
+  <div class="row product-details">
+    <div class="five columns">
+        {% include "shop/_images/product" with { class: 'u-max-full-width' } %}
+    </div>
+    <div class="seven columns">
+
+      <h1>{{ product.title }}</h1>
+
+      {% include 'shop/_includes/_addToCart' %}
+        
+    
+
+      {% if product.clothingBundle %}
+        
+        <h5>{{ product.clothingBundle | length }} Bundled product available</h5>
+
+        {% set bundledVariants = product.clothingBundle %}
+
+        {% for purchasableVariants in bundledVariants %}
+          {% for purchasable in purchasableVariants.variants %}
+            <p>Buy <strong>{{ product }}</strong> with <em>{{ purchasable.title }}</em> for <strong>{{ purchasable.price  }}</strong> <span style="background: {{  purchasable.colors }}; width: 20px; height: 20px; color: {{ purchasable.colors }}">color</span></p>
+          {% endfor %}
+        {% endfor %}
+      
+      {% endif %}
+
+
+      <p><a href="{{ url('shop/products') }}">&larr; Back to all products.</a></p>
+    </div>
+  </div>
+
+
+
+{% endblock %}
